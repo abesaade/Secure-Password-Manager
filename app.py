@@ -31,9 +31,6 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# =======================
-# Models
-# =======================
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
@@ -47,9 +44,6 @@ class PasswordEntry(db.Model):
     encrypted_password = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-# =======================
-# Forms
-# =======================
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min=4, max=150)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=4, max=128)])
@@ -69,9 +63,6 @@ class EntryForm(FlaskForm):
 class DeleteEntryForm(FlaskForm):
     submit = SubmitField('Delete')
 
-# =======================
-# User loader
-# =======================
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -80,9 +71,6 @@ def load_user(user_id):
 def home():
     return redirect(url_for('login'))
 
-# =======================
-# Register
-# =======================
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
