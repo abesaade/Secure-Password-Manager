@@ -5,7 +5,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, U
 from cryptography.fernet import Fernet
 from flask_wtf import CSRFProtect
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import InputRequired, Length
+from wtforms.validators import InputRequired, Length, Regexp
 from flask_wtf.form import FlaskForm
 from dotenv import load_dotenv
 import os
@@ -20,9 +20,6 @@ if not app.config['SECRET_KEY']:
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///password_manager.db'
 app.config['WTF_CSRF_TIME_LIMIT'] = None
 
-
-
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -35,7 +32,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(256), nullable=False)
-    fernet_key = db.Column(db.String(256), nullable=False)  # Store per-user Fernet key
+    fernet_key = db.Column(db.String(256), nullable=False)
 
 class PasswordEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,19 +42,33 @@ class PasswordEntry(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=150)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=4, max=128)])
+    username = StringField('Username', validators=[
+        InputRequired(), Length(min=4, max=150), Regexp(r'^[a-zA-Z0-9_.-]+$', message="Username must contain only letters, numbers, or ./_/-")
+    ])
+    password = PasswordField('Password', validators=[
+        InputRequired(), Length(min=4, max=128)
+    ])
     submit = SubmitField('Login')
 
 class RegisterForm(FlaskForm):
-    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=150)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=6, max=128)])
+    username = StringField('Username', validators=[
+        InputRequired(), Length(min=4, max=150), Regexp(r'^[a-zA-Z0-9_.-]+$', message="Username must contain only letters, numbers, or ./_/-")
+    ])
+    password = PasswordField('Password', validators=[
+        InputRequired(), Length(min=6, max=128), Regexp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).+$', message="Password must contain uppercase, lowercase, and a number")
+    ])
     submit = SubmitField('Register')
 
 class EntryForm(FlaskForm):
-    service = StringField('Service', validators=[InputRequired(), Length(min=1, max=150)])
-    service_username = StringField('Service Username', validators=[InputRequired(), Length(min=1, max=150)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=1, max=128)])
+    service = StringField('Service', validators=[
+        InputRequired(), Length(min=1, max=150), Regexp(r'^[a-zA-Z0-9 .@_-]+$', message="Service name contains invalid characters")
+    ])
+    service_username = StringField('Service Username', validators=[
+        InputRequired(), Length(min=1, max=150), Regexp(r'^[a-zA-Z0-9@._-]+$', message="Username contains invalid characters")
+    ])
+    password = PasswordField('Password', validators=[
+        InputRequired(), Length(min=6, max=128)
+    ])
     submit = SubmitField('Add Entry')
 
 class DeleteEntryForm(FlaskForm):
@@ -81,7 +92,6 @@ def register():
             flash('Username already exists')
             logger.warning(f"Registration attempt with existing username: {username}")
             return redirect(url_for('register'))
-        # Generate per-user Fernet key
         fernet_key = Fernet.generate_key().decode()
         new_user = User(username=username, password=password, fernet_key=fernet_key)
         db.session.add(new_user)
@@ -91,9 +101,6 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
-# =======================
-# Login
-# =======================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -107,9 +114,6 @@ def login():
         logger.warning(f"Failed login attempt for username: {form.username.data}")
     return render_template('login.html', form=form)
 
-# =======================
-# Logout
-# =======================
 @app.route('/logout')
 @login_required
 def logout():
@@ -118,9 +122,6 @@ def logout():
     flash("You have been logged out.")
     return redirect(url_for('login'))
 
-# =======================
-# Dashboard
-# =======================
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
@@ -146,9 +147,6 @@ def dashboard():
         entry.decrypted_password = cipher_suite.decrypt(entry.encrypted_password.encode()).decode()
     return render_template('dashboard.html', entries=entries, form=form, delete_form=delete_form)
 
-# =======================
-# Edit Entry
-# =======================
 @app.route('/edit/<int:entry_id>', methods=['GET', 'POST'])
 @login_required
 def edit_entry(entry_id):
@@ -176,9 +174,6 @@ def edit_entry(entry_id):
         form.password.data = entry.decrypted_password
     return render_template('edit_entry.html', form=form, entry=entry)
 
-# =======================
-# Delete Entry
-# =======================
 @app.route('/delete/<int:entry_id>', methods=['POST'])
 @login_required
 def delete_entry(entry_id):
