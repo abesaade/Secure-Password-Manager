@@ -26,4 +26,16 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            echo 'This will always run after the pipeline finishes.'
+            // Clean up, archive logs, etc.
+        }
+
+        failure {
+            echo 'Pipeline failed! You can notify your team or trigger alerts here.'
+            // Send notifications, emails, or log failure status
+        }
+    }
 }
