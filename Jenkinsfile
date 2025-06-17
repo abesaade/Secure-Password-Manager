@@ -1,50 +1,26 @@
 pipeline {
     agent any
 
-    tools {
-    maven 'Maven 3.9.10'
-    }
-
-    environment {
-        MY_VERSION = '1.2.3'
-    }
-
-    parameters {
-        booleanParam(name: 'executeTests', defaultValue: true, description: 'Run tests?')
-    }
-
     stages {
+        stage('Check Maven') {
+            steps {
+                bat 'mvn -version'  // ✅ Will now work if Maven is in system PATH
+            }
+        }
+
         stage('Build') {
             steps {
-                echo "🔧 Building version ${env.MY_VERSION}"
-                bat 'mvn install'   // ✅ This line runs Maven if it's in your Windows PATH
-            }
-        }
-
-        stage('Test') {
-            when {
-                expression { return params.executeTests == true }
-            }
-            steps {
-                echo '🧪 Running Tests'
-                bat 'mvn test'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo '🚀 Deploying'
-                // bat 'deploy.bat' if you have a Windows deployment script
+                bat 'mvn clean install'  // ✅ Build your Maven project
             }
         }
     }
 
     post {
         always {
-            echo '🔁 This will always run after the pipeline.'
+            echo '✅ Pipeline completed.'
         }
         success {
-            echo '✅ Build succeeded.'
+            echo '🎉 Build succeeded.'
         }
         failure {
             echo '❌ Build failed.'
