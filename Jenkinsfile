@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven 3.8.6'  // must match the name configured above
+    }
+
     environment {
         MY_VERSION = '1.2.3'
     }
