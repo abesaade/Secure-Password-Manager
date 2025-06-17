@@ -29,13 +29,13 @@ pipeline {
 
     post {
         always {
-            echo 'This will always run after the pipeline finishes.'
-            // Clean up, archive logs, etc.
+            echo 'This will always run after the build.'
         }
-
+        success {
+            echo 'This runs if build succeeds.'
+        }
         failure {
-            echo 'Pipeline failed! You can notify your team or trigger alerts here.'
-            // Send notifications, emails, or log failure status
+            echo 'This runs if build fails.'
         }
     }
 }
