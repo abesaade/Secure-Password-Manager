@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3.8.6'
-    }
-
     environment {
         MY_VERSION = '1.2.3'
     }
@@ -17,7 +13,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building version ${env.MY_VERSION}"
-                // Use Maven to build (Windows-compatible)
                 bat 'mvn install'
             }
         }
@@ -28,7 +23,6 @@ pipeline {
             }
             steps {
                 echo 'Testing only when condition is met'
-                // Windows-compatible Maven test
                 bat 'mvn test'
             }
         }
@@ -36,7 +30,6 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying'
-                // Add Windows deployment steps if needed
                 // bat 'deploy.bat'
             }
         }
