@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'  
-    }
-
     environment {
         MY_VERSION = '1.2.3'
     }
@@ -16,8 +12,8 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo "Building version ${env.MY_VERSION}"
-                bat 'mvn install'
+                echo "🔧 Building version ${env.MY_VERSION}"
+                bat 'mvn install'   // ✅ This line runs Maven if it's in your Windows PATH
             }
         }
 
@@ -26,28 +22,28 @@ pipeline {
                 expression { return params.executeTests == true }
             }
             steps {
-                echo 'Testing only when condition is met'
+                echo '🧪 Running Tests'
                 bat 'mvn test'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying'
-                // bat 'deploy.bat'
+                echo '🚀 Deploying'
+                // bat 'deploy.bat' if you have a Windows deployment script
             }
         }
     }
 
     post {
         always {
-            echo 'This will always run after the build.'
+            echo '🔁 This will always run after the pipeline.'
         }
         success {
-            echo 'This runs if build succeeds.'
+            echo '✅ Build succeeded.'
         }
         failure {
-            echo 'This runs if build fails.'
+            echo '❌ Build failed.'
         }
     }
 }
