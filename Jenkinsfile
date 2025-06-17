@@ -2,28 +2,15 @@ pipeline {
     agent any
 
     stages {
-        stage('Check Maven') {
+        stage('Print PATH') {
             steps {
-                bat 'mvn -version'  // ✅ Will now work if Maven is in system PATH
+                bat 'echo %PATH%'
             }
         }
-
-        stage('Build') {
+        stage('Maven Check') {
             steps {
-                bat 'mvn clean install'  // ✅ Build your Maven project
+                bat 'mvn -version'
             }
-        }
-    }
-
-    post {
-        always {
-            echo '✅ Pipeline completed.'
-        }
-        success {
-            echo '🎉 Build succeeded.'
-        }
-        failure {
-            echo '❌ Build failed.'
         }
     }
 }
