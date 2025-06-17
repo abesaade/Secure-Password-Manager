@@ -1,7 +1,10 @@
 pipeline {
     agent any
+    
+    environment {
+        MY_VERSION = '1.2.3'
+    }
 
-    // ✅ Define parameters
     parameters {
         booleanParam(name: 'executeTests', defaultValue: true, description: 'Run tests?')
     }
@@ -9,7 +12,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building'
+                echo "Building version ${env.MY_VERSION}"
                 // Add your build commands here
                 // sh 'javac HelloWorld.java'
             }
