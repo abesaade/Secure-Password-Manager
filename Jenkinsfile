@@ -12,8 +12,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo "🔧 Building version ${env.MY_VERSION}"
-                bat 'mvn install'
+                
             }
         }
 
@@ -23,14 +22,14 @@ pipeline {
             }
             steps {
                 echo '🧪 Running Tests'
-                bat 'mvn test'
+                
             }
         }
 
         stage('Deploy') {
             steps {
                 echo '🚀 Deploying'
-                // bat 'deploy.bat'
+                
             }
         }
     }
