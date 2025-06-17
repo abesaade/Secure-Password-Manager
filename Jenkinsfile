@@ -1,18 +1,26 @@
 pipeline {
     agent any
 
+    // ✅ Define parameters
+    parameters {
+        booleanParam(name: 'executeTests', defaultValue: true, description: 'Run tests?')
+    }
+
     stages {
         stage('Build') {
             steps {
                 echo 'Building'
-                // Add your build commands here, e.g., compile Java
+                // Add your build commands here
                 // sh 'javac HelloWorld.java'
             }
         }
 
         stage('Test') {
+            when {
+                expression { return params.executeTests == true }
+            }
             steps {
-                echo 'Testing'
+                echo 'Testing only when condition is met'
                 // Add your test commands here
                 // sh 'java -cp . org.junit.runner.JUnitCore MyTests'
             }
