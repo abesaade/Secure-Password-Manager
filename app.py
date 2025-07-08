@@ -17,7 +17,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 if not app.config['SECRET_KEY']:
     raise ValueError("No SECRET_KEY set for Flask application. Set it in the environment.")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///password_manager.db'
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'password_manager.db')}"
 app.config['WTF_CSRF_TIME_LIMIT'] = None
 
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +28,8 @@ csrf = CSRFProtect(app)
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -99,7 +102,13 @@ def register():
         flash('Registration successful, please log in')
         logger.info(f"New user registered: {username}")
         return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        logger.warning(f"Form validation failed: {form.errors}")
+        flash('There was an error in your submission.')
+
     return render_template('register.html', form=form)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
