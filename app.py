@@ -58,7 +58,7 @@ class RegisterForm(FlaskForm):
         InputRequired(), Length(min=4, max=150), Regexp(r'^[a-zA-Z0-9_.-]+$', message="Username must contain only letters, numbers, or ./_/-")
     ])
     password = PasswordField('Password', validators=[
-        InputRequired(), Length(min=6, max=128), Regexp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).+$', message="Password must contain uppercase, lowercase, and a number")
+        InputRequired(), Length(min=6, max=128), Regexp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$', message="Password must contain uppercase, lowercase, and a number")
     ])
     submit = SubmitField('Register')
 
@@ -154,6 +154,11 @@ def dashboard():
     cipher_suite = Fernet(current_user.fernet_key.encode())
     for entry in entries:
         entry.decrypted_password = cipher_suite.decrypt(entry.encrypted_password.encode()).decode()
+
+        if request.method == 'POST':
+            logger.warning(f"EntryForm validation failed: {form.errors}")
+            flash("There was an error in your password form submission.")
+        
     return render_template('dashboard.html', entries=entries, form=form, delete_form=delete_form)
 
 @app.route('/edit/<int:entry_id>', methods=['GET', 'POST'])
