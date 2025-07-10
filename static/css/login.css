@@ -1,8 +1,8 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: url("../images/image.avif") no-repeat center center fixed;
+    font-family: 'VARSITY', sans-serif;
+    background: url("../images/passwordmanager.webp") no-repeat center center fixed;
     background-size: cover;
     height: 100vh;
 }
@@ -56,3 +56,4 @@ body::before {
     background-color: rgba(255, 255, 0, 0.2);
     color: white;
 }
+
